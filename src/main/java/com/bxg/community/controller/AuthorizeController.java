@@ -12,7 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -30,7 +32,7 @@ public class AuthorizeController {
     private UserService userService;
 
     @GetMapping("/callback")
-    public String callback(@RequestParam("code")String code, @RequestParam("state")String state, HttpServletRequest request){
+    public String callback(@RequestParam("code")String code, @RequestParam("state")String state, HttpServletRequest request, HttpServletResponse response){
         AccesstokenDTO accesstokenDTO = new AccesstokenDTO();
         accesstokenDTO.setCode(code);
         accesstokenDTO.setState(state);
@@ -45,15 +47,15 @@ public class AuthorizeController {
             GithubUser user=githubProvider.getUser(token);
             System.out.println(user.getName());
             if(user!=null){
-                request.getSession().setAttribute("user",user.getName());
                 User user1=new User();
-                user1.setToken(UUID.randomUUID().toString());
+                String token1=UUID.randomUUID().toString();
+                user1.setToken(token1);
                 user1.setName(user.getName());
                 user1.setAccountId(String.valueOf(user.getId()));
                 user1.setGmtCreate(System.currentTimeMillis());
                 user1.setGmtModified(user1.getGmtCreate());
                 userService.sava(user1);
-
+                response.addCookie(new Cookie("token",token1));
                 return "redirect:/";
             }else {
                 return "redirect:/";

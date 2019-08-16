@@ -4,4 +4,5 @@ import com.bxg.community.dto.User;
 
 public interface UserService {
     User sava(User user);
+    User findByToken(String token);
 }
